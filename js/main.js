@@ -6,6 +6,9 @@ let board = [
   ["", "", ""],
 ];
 
+let children = document.getElementById("game-board").getElementsByTagName("*");
+console.log(children);
+
 // the user chooses which player he will be
 let userPlyer = "";
 Swal.fire({
@@ -40,21 +43,25 @@ function onClick(id) {
       detectWinner();
     }
 
+    disableBoard();
     // AI move
     setTimeout(() => {
       if (move % 2 == 1) {
         move++;
         aiMove(board, "O", " green", true, move);
         detectWinner();
+        enableBoard();
       }
     }, 500);
   } else {
     // AI move
+    disableBoard();
     setTimeout(() => {
       if (move % 2 == 0) {
         move++;
         aiMove(board, "X", " orange", false, move);
         detectWinner();
+        enableBoard();
       }
     }, 500);
 
@@ -68,39 +75,49 @@ function onClick(id) {
 }
 
 function detectWinner() {
+  disableBoard();
+
   // checks if we have a winner and displays winner dialog
   let winnerX = checkWin(board, "X");
   let winnerO = checkWin(board, "O");
 
   if (winnerX) {
-    Swal.fire({
-      title: "Player X won!",
-      confirmButtonText: "Play again",
-      confirmButtonColor: "#df5244",
-    }).then((result) => {
-      location.reload();
-    });
+    setTimeout(() => {
+      Swal.fire({
+        title: "Player X won!",
+        confirmButtonText: "Play again",
+        confirmButtonColor: "#df5244",
+      }).then((result) => {
+        location.reload();
+      });
+    }, 1000);
   }
 
   if (winnerO) {
-    Swal.fire({
-      title: "Player O won!",
-      confirmButtonText: "Play again",
-      confirmButtonColor: "#1eba9c",
-    }).then((result) => {
-      location.reload();
-    });
+    setTimeout(() => {
+      Swal.fire({
+        title: "Player O won!",
+        confirmButtonText: "Play again",
+        confirmButtonColor: "#1eba9c",
+      }).then((result) => {
+        location.reload();
+      });
+    }, 1000);
   }
 
   if (getEmptyCells(board).length == 0) {
-    Swal.fire({
-      title: "Draw!",
-      confirmButtonText: "Play again",
-      confirmButtonColor: "#34495e",
-    }).then((result) => {
-      location.reload();
-    });
+    setTimeout(() => {
+      Swal.fire({
+        title: "Draw!",
+        confirmButtonText: "Play again",
+        confirmButtonColor: "#34495e",
+      }).then((result) => {
+        location.reload();
+      });
+    }, 1000);
   }
+
+  enableBoard();
 }
 
 function aiMove(board, char, className, isMaximizingPlayer, move) {
@@ -249,4 +266,16 @@ function bestMove(board, player, isMaximizingPlayer, depth) {
     }
   }
   return bestMove;
+}
+
+function disableBoard() {
+  for (let i = 0; i < children.length; i++) {
+    children[i].ariaDisabled = true;
+  }
+}
+
+function enableBoard() {
+  for (let i = 0; i < children.length; i++) {
+    children[i].ariaDisabled = false;
+  }
 }
