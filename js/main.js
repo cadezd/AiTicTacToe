@@ -6,8 +6,6 @@ let board = [
   ["", "", ""],
 ];
 
-let gameBoard = document.getElementById("game-board");
-
 // the user chooses which player he will be
 let userPlyer = "";
 Swal.fire({
@@ -28,7 +26,7 @@ Swal.fire({
   }
 });
 
-function onClick(id) {
+async function onClick(id) {
   let cellX = document.getElementById(id);
 
   // makes sure that cell is empty
@@ -36,36 +34,28 @@ function onClick(id) {
 
   if (userPlyer === "X") {
     // player move
-    if (move % 2 == 0) {
-      move++;
-      playerMove(id, cellX, board, "X", " orange");
-      detectWinner();
-    }
+    move++;
+    playerMove(id, cellX, board, "X", " orange");
+    await detectWinner();
 
     // AI move
-    setTimeout(() => {
-      if (move % 2 == 1) {
-        move++;
-        aiMove(board, "O", " green", true, move);
-        detectWinner();
-      }
+    setTimeout(async () => {
+      move++;
+      aiMove(board, "O", " green", true, move);
+      await detectWinner();
     }, 300);
   } else {
     // AI move
-    setTimeout(() => {
-      if (move % 2 == 0) {
-        move++;
-        aiMove(board, "X", " orange", false, move);
-        detectWinner();
-      }
+    setTimeout(async () => {
+      move++;
+      aiMove(board, "X", " orange", false, move);
+      await detectWinner();
     }, 300);
 
     // player move
-    if (move % 2 == 1) {
-      move++;
-      playerMove(id, cellX, board, "O", " green");
-      detectWinner();
-    }
+    move++;
+    playerMove(id, cellX, board, "O", " green");
+    await detectWinner();
   }
 }
 
@@ -74,9 +64,9 @@ function detectWinner() {
   let winnerX = checkWin(board, "X");
   let winnerO = checkWin(board, "O");
 
-  disableDivAndChildren(gameBoard);
-  setTimeout(() => {
-    if (winnerX) {
+  if (winnerX) {
+    disableGameBoard();
+    setTimeout(() => {
       Swal.fire({
         title: "Player X won!",
         confirmButtonText: "Play again",
@@ -84,7 +74,10 @@ function detectWinner() {
       }).then((result) => {
         location.reload();
       });
-    } else if (winnerO) {
+    }, 2000);
+  } else if (winnerO) {
+    disableGameBoard();
+    setTimeout(() => {
       Swal.fire({
         title: "Player O won!",
         confirmButtonText: "Play again",
@@ -92,7 +85,10 @@ function detectWinner() {
       }).then((result) => {
         location.reload();
       });
-    } else if (getEmptyCells(board).length == 0) {
+    }, 2000);
+  } else if (getEmptyCells(board).length == 0) {
+    disableGameBoard();
+    setTimeout(() => {
       Swal.fire({
         title: "Draw!",
         confirmButtonText: "Play again",
@@ -100,10 +96,8 @@ function detectWinner() {
       }).then((result) => {
         location.reload();
       });
-    } else {
-      enableDivAndChildren(gameBoard);
-    }
-  }, 1000);
+    }, 2000);
+  }
 }
 
 function aiMove(board, char, className, isMaximizingPlayer, move) {
@@ -254,20 +248,11 @@ function bestMove(board, player, isMaximizingPlayer, depth) {
   return bestMove;
 }
 
-function disableDivAndChildren(element) {
-  // Disable all child elements recursively
-  let children = element.children;
+function disableGameBoard() {
+  // Disables game board
+  let gameBoard = document.getElementById("game-board");
+  let children = gameBoard.children;
   for (let i = 0; i < children.length; i++) {
     children[i].onClick = () => {};
-  }
-}
-
-function enableDivAndChildren(element) {
-  // Enable all child elements recursively
-  let children = element.children;
-  for (let i = 0; i < children.length; i++) {
-    children[i].onClick = () => {
-      onClick(children[i].id);
-    };
   }
 }
